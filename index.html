@@ -4,20 +4,79 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>COG EXHORTERS Exam Preparation Assistant - Beta Test</title>
-    <link rel="stylesheet" href="styles.css">
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        h1 { color: #2c3e50; }
+        #questionInput {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 10px;
+        }
+        #submitButton {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            cursor: pointer;
+        }
+        #submitButton:hover { background-color: #2980b9; }
+        #response {
+            background-color: #f9f9f9;
+            border: 1px solid #ddd;
+            padding: 20px;
+            margin-top: 20px;
+        }
+    </style>
 </head>
 <body>
-    <div class="container">
-        <h1>COG EXHORTERS Exam Preparation Assistant - Beta Test</h1>
-        <p>Welcome, beta tester! This tool is designed to help with preparation for Church of God (COG) Exhorter exam. Please enter your questions below and provide feedback on the responses.</p>
-        
-        <textarea id="questionInput" rows="4" placeholder="Enter your question here..."></textarea>
-        <button id="submitButton">Submit Question</button>
-        
-        <div id="response"></div>
-    </div>
+    <h1>COG EXHORTERS Exam Preparation Assistant - Beta Test</h1>
+    <p>Welcome, beta tester! This tool is designed to help with preparation for Church of God (COG) Exhorter exam. Please enter your questions below and provide feedback on the responses.</p>
+    
+    <textarea id="questionInput" rows="4" placeholder="Enter your question here..."></textarea>
+    <button id="submitButton">Submit Question</button>
+    
+    <div id="response"></div>
 
-    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
-    <script src="script.js"></script>
+    <script>
+        const API_ENDPOINT = 'https://api.openai.com/v1/chat/completions';
+        const API_KEY = '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'; // Your API key
+        const MODEL_ID = 'ft:gpt-3.5-turbo-0125:personal::AEgmfJp5'; // Your fine-tuned model ID
+
+        document.getElementById('submitButton').addEventListener('click', async () => {
+            const question = document.getElementById('questionInput').value;
+            const responseDiv = document.getElementById('response');
+            
+            responseDiv.innerHTML = 'Generating response...';
+            
+            try {
+                const response = await axios.post(API_ENDPOINT, {
+                    model: MODEL_ID,
+                    messages: [
+                        {role: "system", content: "You are a helpful assistant that provides insights and helps users prepare for Church of God (COG) Exhorter exams, Ordained Minister exams, and Bishop exams."},
+                        {role: "user", content: question}
+                    ]
+                }, {
+                    headers: {
+                        'Authorization': `Bearer ${API_KEY}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                const answer = response.data.choices[0].message.content;
+                responseDiv.innerHTML = `<strong>Question:</strong> ${question}<br><br><strong>Answer:</strong> ${answer}`;
+            } catch (error) {
+                console.error('Error:', error);
+                responseDiv.innerHTML = 'An error occurred while generating the response. Please try again.';
+            }
+        });
+    </script>
 </body>
 </html>
