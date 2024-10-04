@@ -1,0 +1,31 @@
+const API_ENDPOINT = 'https://api.openai.com/v1/chat/completions';
+const API_KEY = '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'; // Your API key
+const MODEL_ID = 'ft:gpt-3.5-turbo-0125:personal::AEgmfJp5'; // Your fine-tuned model ID
+
+document.getElementById('submitButton').addEventListener('click', async () => {
+    const question = document.getElementById('questionInput').value;
+    const responseDiv = document.getElementById('response');
+    
+    responseDiv.innerHTML = 'Generating response...';
+    
+    try {
+        const response = await axios.post(API_ENDPOINT, {
+            model: MODEL_ID,
+            messages: [
+                {role: "system", content: "You are a helpful assistant that provides insights and helps users prepare for Church of God (COG) Exhorter exams, Ordained Minister exams, and Bishop exams."},
+                {role: "user", content: question}
+            ]
+        }, {
+            headers: {
+                'Authorization': `Bearer ${API_KEY}`,
+                'Content-Type': 'application/json'
+            }
+        });
+        
+        const answer = response.data.choices[0].message.content;
+        responseDiv.innerHTML = `<strong>Question:</strong> ${question}<br><br><strong>Answer:</strong> ${answer}`;
+    } catch (error) {
+        console.error('Error:', error);
+        responseDiv.innerHTML = 'An error occurred while generating the response. Please try again.';
+    }
+});
