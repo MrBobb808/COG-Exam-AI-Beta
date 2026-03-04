@@ -1,6 +1,10 @@
-import { createClient } from "@supabase/supabase-js";
+import { createBrowserClient } from "@supabase/ssr";
+
+let client: ReturnType<typeof createBrowserClient> | null = null;
 
 export const supabaseBrowser = () => {
+  if (client) return client;
+
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const anon = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
@@ -8,5 +12,6 @@ export const supabaseBrowser = () => {
     throw new Error("Missing Supabase env vars. Check .env.local");
   }
 
-  return createClient(url, anon);
+  client = createBrowserClient(url, anon);
+  return client;
 };

@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
 import { supabaseServer } from "@/lib/supabase/server";
-import SignOutButton from "@/components/SignOutButton";
+import AppShell from "@/components/AppShell";
 
 export default async function AppLayout({
   children,
@@ -8,26 +8,40 @@ export default async function AppLayout({
   children: React.ReactNode;
 }) {
   const supabase = await supabaseServer();
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
 
   if (!user) {
     redirect("/login");
   }
 
+  // Check if user is admin in any cohort
+  const { data: adminCheck } = await supabase
+    .from("cohort_members")
+    .select("id")
+    .eq("user_id", user.id)
+    .eq("role", "admin")
+    .eq("status", "active")
+    .limit(1);
+
+  const isAdmin = (adminCheck?.length ?? 0) > 0;
+
+  // Fetch profile for sidebar & header
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("display_name, avatar_url")
+    .eq("user_id", user.id)
+    .maybeSingle();
+
   return (
-    <div className="min-h-screen">
-      <nav className="border-b border-zinc-200 dark:border-zinc-800">
-        <div className="mx-auto flex max-w-5xl items-center justify-between px-4 py-3">
-          <span className="text-lg font-semibold">TechPillar Hub</span>
-          <div className="flex items-center gap-4">
-            <span className="text-sm text-zinc-600 dark:text-zinc-400">
-              {user.email}
-            </span>
-            <SignOutButton />
-          </div>
-        </div>
-      </nav>
-      <main className="mx-auto max-w-5xl px-4 py-8">{children}</main>
-    </div>
+    <AppShell
+      isAdmin={isAdmin}
+      displayName={profile?.display_name ?? null}
+      avatarUrl={profile?.avatar_url ?? null}
+      userEmail={user.email ?? ""}
+    >
+      {children}
+    </AppShell>
   );
 }

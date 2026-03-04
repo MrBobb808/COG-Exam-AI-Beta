@@ -1,10 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { Suspense, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { supabaseBrowser } from "@/lib/supabase/client";
 
-export default function LoginPage() {
+function LoginForm() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [err, setErr] = useState<string | null>(null);
@@ -34,34 +34,42 @@ export default function LoginPage() {
   };
 
   return (
+    <form onSubmit={onSubmit} className="space-y-3">
+      <input
+        className="w-full border rounded p-2"
+        placeholder="Email"
+        type="email"
+        value={email}
+        onChange={(e) => setEmail(e.target.value)}
+        required
+      />
+      <input
+        className="w-full border rounded p-2"
+        placeholder="Password"
+        type="password"
+        value={password}
+        onChange={(e) => setPassword(e.target.value)}
+        required
+      />
+      {err && <p className="text-sm text-red-600">{err}</p>}
+      <button
+        className="w-full border rounded p-2"
+        type="submit"
+        disabled={loading}
+      >
+        {loading ? "Logging in..." : "Login"}
+      </button>
+    </form>
+  );
+}
+
+export default function LoginPage() {
+  return (
     <main className="mx-auto max-w-md p-6 space-y-4">
       <h1 className="text-xl font-semibold">Login</h1>
-      <form onSubmit={onSubmit} className="space-y-3">
-        <input
-          className="w-full border rounded p-2"
-          placeholder="Email"
-          type="email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          required
-        />
-        <input
-          className="w-full border rounded p-2"
-          placeholder="Password"
-          type="password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          required
-        />
-        {err && <p className="text-sm text-red-600">{err}</p>}
-        <button
-          className="w-full border rounded p-2"
-          type="submit"
-          disabled={loading}
-        >
-          {loading ? "Logging in..." : "Login"}
-        </button>
-      </form>
+      <Suspense fallback={<p className="text-sm text-gray-400">Loading...</p>}>
+        <LoginForm />
+      </Suspense>
     </main>
   );
 }
