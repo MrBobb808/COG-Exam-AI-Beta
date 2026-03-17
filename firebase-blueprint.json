@@ -1,0 +1,302 @@
+{
+  "entities": {
+    "WorkoutLog": {
+      "title": "Workout Log",
+      "description": "A single training session log entry (Strength or BJJ).",
+      "type": "object",
+      "properties": {
+        "date": { "type": "string", "format": "date" },
+        "phase": { "type": "string" },
+        "day": { "type": "string" },
+        "type": { "type": "string", "enum": ["strength", "bjj"] },
+        "exercise": { "type": "string" },
+        "sets": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "weight": { "type": "string" },
+              "reps": { "type": "string" },
+              "estimated1RM": { "type": "number" }
+            }
+          }
+        },
+        "rounds": { "type": "number" },
+        "subsAttempted": { "type": "number" },
+        "subsLanded": { "type": "number" },
+        "subsReceived": { "type": "number" },
+        "dominantPositions": { "type": "number" },
+        "escapesAttempted": { "type": "number" },
+        "escapesSuccessful": { "type": "number" },
+        "subType": { "type": "string" },
+        "hardestPart": { "type": "string" },
+        "whatWentWell": { "type": "string" },
+        "techniqueNotes": { "type": "string" },
+        "sessionLoad": { "type": "number" },
+        "caloriesBurned": { "type": "number" },
+        "timestamp": { "type": "string", "format": "date-time" }
+      },
+      "required": ["date", "type", "timestamp"]
+    },
+    "RecoveryLog": {
+      "title": "Recovery Log",
+      "description": "Daily recovery check-in.",
+      "type": "object",
+      "properties": {
+        "date": { "type": "string", "format": "date" },
+        "sleep": { "type": "number" },
+        "energy": { "type": "number" },
+        "soreness": { "type": "number" },
+        "stress": { "type": "number" },
+        "score": { "type": "number" },
+        "timestamp": { "type": "string", "format": "date-time" }
+      },
+      "required": ["date", "score"]
+    },
+    "DailyStats": {
+      "title": "Daily Stats",
+      "description": "Daily metabolic and body metrics.",
+      "type": "object",
+      "properties": {
+        "isDailyStats": { "type": "boolean" },
+        "date": { "type": "string", "format": "date" },
+        "bodyWeight": { "type": "number" },
+        "caloriesBurned": { "type": "number" },
+        "baseCalories": { "type": "number" },
+        "trainingLoad": { "type": "number" },
+        "recoveryScore": { "type": "number" },
+        "timestamp": { "type": "string", "format": "date-time" }
+      },
+      "required": ["date", "isDailyStats"]
+    },
+    "HealthKitBiometric": {
+      "title": "HealthKit Biometric Sample",
+      "description": "Raw biometric data ingested from Apple HealthKit (Active Energy, RHR, HRV, Sleep).",
+      "type": "object",
+      "properties": {
+        "date": { "type": "string", "format": "date" },
+        "source": { "type": "string", "enum": ["apple_watch", "iphone", "manual", "third_party"] },
+        "activeEnergyBurned": { "type": "number", "description": "kcal from HKQuantityTypeIdentifierActiveEnergyBurned" },
+        "restingHeartRate": { "type": "number", "description": "bpm from HKQuantityTypeIdentifierRestingHeartRate" },
+        "hrv": { "type": "number", "description": "ms from HKQuantityTypeIdentifierHeartRateVariabilitySDNN" },
+        "sleepHours": { "type": "number", "description": "Total sleep duration in hours" },
+        "sleepStages": {
+          "type": "object",
+          "properties": {
+            "awake": { "type": "number", "description": "Minutes awake" },
+            "rem": { "type": "number", "description": "Minutes in REM" },
+            "core": { "type": "number", "description": "Minutes in light/core sleep" },
+            "deep": { "type": "number", "description": "Minutes in deep sleep" }
+          }
+        },
+        "vo2Max": { "type": "number", "description": "mL/kg/min" },
+        "stepCount": { "type": "number" },
+        "standHours": { "type": "number" },
+        "syncedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["date", "source", "syncedAt"]
+    },
+    "DailyMacroTarget": {
+      "title": "Daily Macro Target",
+      "description": "Dynamically adjusted macro/calorie targets based on HealthKit Active Energy and training strain.",
+      "type": "object",
+      "properties": {
+        "date": { "type": "string", "format": "date" },
+        "strainLevel": { "type": "string", "enum": ["rest", "low", "moderate", "high", "extreme"] },
+        "baseCalories": { "type": "number" },
+        "baseProteinG": { "type": "number" },
+        "baseCarbsG": { "type": "number" },
+        "baseFatG": { "type": "number" },
+        "adjustedCalories": { "type": "number" },
+        "adjustedProteinG": { "type": "number" },
+        "adjustedCarbsG": { "type": "number" },
+        "adjustedFatG": { "type": "number" },
+        "calorieAdjustment": { "type": "number" },
+        "carbAdjustment": { "type": "number" },
+        "adjustmentReason": { "type": "string" },
+        "activeEnergyUsed": { "type": "number" },
+        "sessionTypes": { "type": "array", "items": { "type": "string" } },
+        "timestamp": { "type": "string", "format": "date-time" }
+      },
+      "required": ["date", "strainLevel", "baseCalories", "adjustedCalories"]
+    },
+    "HealthKitWorkoutExport": {
+      "title": "HealthKit Workout Export",
+      "description": "Record of workout sessions written back TO Apple Health for activity ring credit.",
+      "type": "object",
+      "properties": {
+        "date": { "type": "string", "format": "date" },
+        "workoutLogId": { "type": "string", "description": "FK to workout_logs" },
+        "healthKitWorkoutType": { "type": "string", "enum": ["functionalStrengthTraining", "martialArts"] },
+        "durationMinutes": { "type": "number" },
+        "totalEnergyBurned": { "type": "number" },
+        "averageHeartRate": { "type": "number" },
+        "exportedAt": { "type": "string", "format": "date-time" },
+        "exportStatus": { "type": "string", "enum": ["pending", "success", "failed"] },
+        "errorMessage": { "type": "string" }
+      },
+      "required": ["date", "workoutLogId", "healthKitWorkoutType", "exportStatus"]
+    },
+    "WeeklySummary": {
+      "title": "Weekly Summary",
+      "description": "AI-generated weekly visual summary with Biblit mascot, produced by Nano Banana 2 pipeline.",
+      "type": "object",
+      "properties": {
+        "weekEnding": { "type": "string", "format": "date" },
+        "poundsLost": { "type": "number" },
+        "bjjHours": { "type": "number" },
+        "liftingVolume": { "type": "number" },
+        "caloricAdherence": { "type": "number" },
+        "imageUrl": { "type": "string" },
+        "prompt": { "type": "string" },
+        "style": { "type": "string", "enum": ["3d", "comic", "photorealistic"] },
+        "mascotTier": { "type": "string", "enum": ["base", "training", "warrior", "champion", "legendary"] },
+        "mascotAccessories": { "type": "array", "items": { "type": "string" } },
+        "generationModel": { "type": "string" },
+        "timestamp": { "type": "string", "format": "date-time" }
+      },
+      "required": ["weekEnding", "style", "timestamp"]
+    },
+    "SummaryPipelineRun": {
+      "title": "Summary Pipeline Run",
+      "description": "Tracks the status of each automated Sunday 6PM pipeline execution.",
+      "type": "object",
+      "properties": {
+        "userEmail": { "type": "string" },
+        "scheduledFor": { "type": "string", "format": "date-time" },
+        "status": { "type": "string", "enum": ["scheduled", "aggregating", "generating", "overlaying", "complete", "failed"] },
+        "metrics": {
+          "type": "object",
+          "properties": {
+            "poundsLost": { "type": "number" },
+            "bjjHours": { "type": "number" },
+            "liftingVolume": { "type": "number" },
+            "caloricAdherence": { "type": "number" }
+          }
+        },
+        "mascotTier": { "type": "string" },
+        "generatedPrompt": { "type": "string" },
+        "rawImageUrl": { "type": "string" },
+        "finalImageUrl": { "type": "string" },
+        "style": { "type": "string", "enum": ["3d", "comic", "photorealistic"] },
+        "errorMessage": { "type": "string" },
+        "startedAt": { "type": "string", "format": "date-time" },
+        "completedAt": { "type": "string", "format": "date-time" },
+        "timestamp": { "type": "string", "format": "date-time" }
+      },
+      "required": ["userEmail", "status", "style", "timestamp"]
+    },
+    "ConnectedSocialAccount": {
+      "title": "Connected Social Account",
+      "description": "OAuth-linked social media account for direct one-tap broadcasting.",
+      "type": "object",
+      "properties": {
+        "platform": { "type": "string", "enum": ["instagram_grid", "instagram_reels", "instagram_stories", "tiktok", "youtube_community", "twitter", "native_share"] },
+        "accountHandle": { "type": "string" },
+        "connectedAt": { "type": "string", "format": "date-time" },
+        "lastUsedAt": { "type": "string", "format": "date-time" },
+        "isActive": { "type": "boolean" }
+      },
+      "required": ["platform", "accountHandle", "isActive"]
+    },
+    "FormattedExport": {
+      "title": "Formatted Export",
+      "description": "A weekly summary image cropped/formatted for a specific social platform.",
+      "type": "object",
+      "properties": {
+        "weeklySummaryId": { "type": "string" },
+        "format": { "type": "string", "enum": ["1:1", "16:9", "9:16"] },
+        "platform": { "type": "string" },
+        "imageUrl": { "type": "string" },
+        "caption": { "type": "string" },
+        "hashtags": { "type": "array", "items": { "type": "string" } },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["weeklySummaryId", "format", "imageUrl"]
+    },
+    "Macrocycle": {
+      "title": "Macrocycle",
+      "description": "A 12-week training block that archives weekly images and generates a progression timelapse.",
+      "type": "object",
+      "properties": {
+        "userEmail": { "type": "string" },
+        "name": { "type": "string", "description": "e.g., 'Spring 2026 Cut'" },
+        "startDate": { "type": "string", "format": "date" },
+        "endDate": { "type": "string", "format": "date" },
+        "status": { "type": "string", "enum": ["active", "completed", "abandoned"] },
+        "frames": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "weekNumber": { "type": "number" },
+              "weeklySummaryId": { "type": "string" },
+              "imageUrl": { "type": "string" },
+              "thumbnailUrl": { "type": "string" },
+              "metrics": {
+                "type": "object",
+                "properties": {
+                  "poundsLost": { "type": "number" },
+                  "bjjHours": { "type": "number" },
+                  "liftingVolume": { "type": "number" },
+                  "caloricAdherence": { "type": "number" }
+                }
+              },
+              "weekEnding": { "type": "string", "format": "date" },
+              "createdAt": { "type": "string", "format": "date-time" }
+            }
+          }
+        },
+        "timelapseVideoUrl": { "type": "string" },
+        "timelapseStatus": { "type": "string", "enum": ["pending", "generating", "complete", "failed"] },
+        "totalPoundsLost": { "type": "number" },
+        "totalBjjHours": { "type": "number" },
+        "totalLiftingVolume": { "type": "number" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["userEmail", "startDate", "status", "timelapseStatus"]
+    }
+  },
+  "firestore": {
+    "artifacts/{appId}/users/{userId}/workout_logs/{logId}": {
+      "schema": "WorkoutLog",
+      "description": "User workout logs and daily stats."
+    },
+    "artifacts/{appId}/users/{userId}/recovery_logs/{logId}": {
+      "schema": "RecoveryLog",
+      "description": "User recovery check-ins."
+    },
+    "artifacts/{appId}/users/{userId}/healthkit_biometrics/{date}": {
+      "schema": "HealthKitBiometric",
+      "description": "Daily HealthKit biometric samples keyed by date (YYYY-MM-DD). One document per day, upserted on each sync."
+    },
+    "artifacts/{appId}/users/{userId}/daily_macro_targets/{date}": {
+      "schema": "DailyMacroTarget",
+      "description": "Dynamically calibrated macro targets per day. Recalculated when new HealthKit data arrives or workouts are logged."
+    },
+    "artifacts/{appId}/users/{userId}/healthkit_exports/{exportId}": {
+      "schema": "HealthKitWorkoutExport",
+      "description": "Audit trail of workouts written back to Apple Health. Prevents duplicate exports."
+    },
+    "artifacts/{appId}/users/{userId}/weekly_summaries/{summaryId}": {
+      "schema": "WeeklySummary",
+      "description": "AI-generated weekly visual summaries with Biblit mascot. Includes raw + overlaid images."
+    },
+    "artifacts/{appId}/users/{userId}/pipeline_runs/{runId}": {
+      "schema": "SummaryPipelineRun",
+      "description": "Logs of each Sunday automated pipeline execution for debugging and retry logic."
+    },
+    "artifacts/{appId}/users/{userId}/social_accounts/{accountId}": {
+      "schema": "ConnectedSocialAccount",
+      "description": "OAuth-linked social media accounts. Tokens stored encrypted server-side only."
+    },
+    "artifacts/{appId}/users/{userId}/formatted_exports/{exportId}": {
+      "schema": "FormattedExport",
+      "description": "Platform-specific formatted images ready for sharing. Linked to weekly summaries."
+    },
+    "artifacts/{appId}/users/{userId}/macrocycles/{macrocycleId}": {
+      "schema": "Macrocycle",
+      "description": "12-week training blocks with archived timelapse frames and generated MP4 video."
+    }
+  }
+}
